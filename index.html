@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Snake Game | Ayaan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  background:#0f172a;
+  font-family:Inter,Segoe UI,Roboto,sans-serif;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.game{
+  background:#020617;
+  border-radius:20px;
+  padding:25px;
+  box-shadow:0 25px 60px rgba(0,0,0,.6);
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:15px;
+  font-size:18px;
+}
+
+canvas{
+  background:#020617;
+  border:2px solid #22c55e;
+  border-radius:12px;
+}
+
+button{
+  margin-top:15px;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:#22c55e;
+  color:black;
+  font-size:16px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+  <div class="header">
+    <div>Score: <span id="score">0</span></div>
+    <div>Best: <span id="best">0</span></div>
+  </div>
+
+  <canvas id="game" width="320" height="320"></canvas>
+
+  <button onclick="startGame()">Start / Restart</button>
+</div>
+
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+const size=20;
+const tiles=canvas.width/size;
+
+let snake,dir,food,score,best=0,loop;
+
+function startGame(){
+  snake=[{x:10,y:10}];
+  dir={x:1,y:0};
+  food=randomFood();
+  score=0;
+  document.getElementById("score").innerText=0;
+  clearInterval(loop);
+  loop=setInterval(update,120);
+}
+
+function randomFood(){
+  return{
+    x:Math.floor(Math.random()*tiles),
+    y:Math.floor(Math.random()*tiles)
+  };
+}
+
+function update(){
+  const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+
+  if(head.x<0||head.y<0||head.x>=tiles||head.y>=tiles||
+     snake.some(s=>s.x===head.x&&s.y===head.y)){
+    clearInterval(loop);
+    best=Math.max(best,score);
+    document.getElementById("best").innerText=best;
+    return;
+  }
+
+  snake.unshift(head);
+
+  if(head.x===food.x&&head.y===food.y){
+    score++;
+    document.getElementById("score").innerText=score;
+    food=randomFood();
+  }else{
+    snake.pop();
+  }
+
+  draw();
+}
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  ctx.fillStyle="#22c55e";
+  snake.forEach(s=>{
+    ctx.fillRect(s.x*size,s.y*size,size-1,size-1);
+  });
+
+  ctx.fillStyle="#ef4444";
+  ctx.fillRect(food.x*size,food.y*size,size-1,size-1);
+}
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowUp"&&dir.y!==1)dir={x:0,y:-1};
+  if(e.key==="ArrowDown"&&dir.y!==-1)dir={x:0,y:1};
+  if(e.key==="ArrowLeft"&&dir.x!==1)dir={x:-1,y:0};
+  if(e.key==="ArrowRight"&&dir.x!==-1)dir={x:1,y:0};
+});
+</script>
+
+</body>
+</html>
